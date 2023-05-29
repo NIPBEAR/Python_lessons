@@ -1,8 +1,0 @@
-Header!!!
-
-write a program that reads a file breaks each line into words
-strips whitespace and punctuation from the words and converts them to lowercase
-
-hint the string module provides a string named whitespace
-which contains space tab newline etc and punctuation which contains
-the punctuation characters let’s see if we can make python swear
