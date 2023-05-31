@@ -29,8 +29,7 @@ def write_file(name_file: str):
 
 
 def read_text(text) -> list:
-    with open(text, 'r') as file:
-        lst = file.readlines()
+    lst = give_me_list(text)
     lst = [lst[i].split() for i in range(len(lst))]
     return [lst[i][j] for i in range(len(lst))
             for j in range(len(lst[i]))]
