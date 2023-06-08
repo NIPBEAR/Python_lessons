@@ -1,48 +1,44 @@
 import string
 
 
-def give_me_list(name_file: str) -> list:
+def read_lines_from_file(name_file: str) -> list:
     with open(name_file, 'r') as file:
         return file.readlines()
 
 
-def change_list(name_file: str) -> list:
+def sanitize_list(name_file: str) -> list:
     sym = string.punctuation
-    lst = give_me_list(name_file)
-    lst[0] = lst[0].replace('\n', '')
-    for i in range(1, len(lst)):
-        lst[i] = lst[i].lower()
-        lst[i] = lst[i].strip()
-        for j in sym:
-            if j in lst[i]:
-                lst[i] = lst[i].replace(j, '')
-        lst[i] = lst[i].replace('\n', '')
+    lst = read_lines_from_file(name_file)
+
+    def _sanitize(word: str) -> str:
+        word = word.strip().lower()
+        word = ''.join([a for a in word if a not in sym])
+        return word
+
+    head = lst[0].strip()
+    lst = [head] + [_sanitize(word) for word in lst[1:]]
+
     return lst
 
 
 def write_file(name_file: str):
-    new_file = open('result text.txt', 'w+')
-    lst = change_list(name_file)
-    for i in lst:
-        new_file.write(i)
-        new_file.write('\n')
+    with open('result text.txt', 'w+') as new_file:
+        lst = sanitize_list(name_file)
+        for i in lst:
+            new_file.write(i)
+            new_file.write('\n')
 
 
-def read_text(text) -> list:
-    lst = give_me_list(text)
-    lst = [lst[i].split() for i in range(len(lst))]
-    return [lst[i][j] for i in range(len(lst))
-            for j in range(len(lst[i]))]
+def read_text(text: str) -> list[str]:
+    lst = read_lines_from_file(text)
+    return [word for line in lst for word in line.split()]
 
 
 def create_dict(lst: list) -> dict:
     d = {}
-    for i in lst:
-        key = i
-        if i not in d.keys():
-            d[key] = 1
-        else:
-            d[key] += 1
+    for key in lst:
+        d.setdefault(key, 0)
+        d[key] += 1
     return d
 
 
@@ -54,25 +50,15 @@ def give_me_quantity_words() -> int:
 def give_me_quantity_uniq_words() -> int:
     lst = read_text('result text.txt')
     d = create_dict(lst)
-    count = 0
-    for value in d.values():
-        if value == 1:
-            count += 1
-    return count
+    return len(d.keys())
 
 
 def give_me_list_popular_words(kol=20) -> list:
     lst = read_text('result text.txt')
     d = create_dict(lst)
-    sort_values = sorted(d.values(), reverse=True)
-    res = []
-    for i in range(len(sort_values)):
-        for key, values in d.items():
-            if sort_values[i] == values and key not in res:
-                res.append(key)
-                break
-    return [res[i] for i in range(kol)] if len(res) > kol \
-        else [res[i] for i in range(len(res))]
+
+    res = sorted(d.items(), reverse=True, key=lambda x: x[1])
+    return [x[0] for x in res][:kol]
 
 
 def write_filter_words():
@@ -81,7 +67,7 @@ def write_filter_words():
     write_file('original text')
     lst_result = read_text('result text.txt')
 
-    res = list(filter(lambda x: x not in filter_lst, lst_result))
+    res = [l for l in lst_result if l not in filter_lst]
 
     with open('result text.txt', 'w+') as file:
         for i in res:
